@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MP_ConfigFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -225,6 +229,10 @@
 			</File>
 			<File
 				RelativePath=".\MFC_readFileDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MP_ConfigFile.h"
 				>
 			</File>
 			<File

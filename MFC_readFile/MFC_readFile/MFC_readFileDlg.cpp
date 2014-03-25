@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "MFC_readFile.h"
 #include "MFC_readFileDlg.h"
+#include "MP_ConfigFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -153,6 +154,7 @@ HCURSOR CMFC_readFileDlg::OnQueryDragIcon()
 void CMFC_readFileDlg::OnBnClickedButton1()
 {
 	// TODO: Add your control notification handler code here
+#if 0
 	char* pszFileName="myfile.ini";
 	CStdioFile myFile;
 	CFileException fileException;
@@ -170,5 +172,15 @@ void CMFC_readFileDlg::OnBnClickedButton1()
 		TRACE("Can't open file %s,error=%u\n",pszFileName,fileException.m_cause);
 	}
 	myFile.Close();
+#endif
+	char value[20] = {"0x300"};
+
+	MPWriteSTBProvider(value);
+
+	MPReadSTBProvider(value);
+
+	MessageBox(value);
+
+
 
 }
