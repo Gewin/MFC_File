@@ -1,16 +1,16 @@
 #include "stdafx.h"
 #include "MP_ConfigFile.h"
 
-char *pszFileName="MP_Config_File.ini";
+LPCTSTR pszFileName= _T("MP_Config_File.ini");
 
-static int GetConfigValue(char *name, char *value)
+static int GetConfigValue(LPCTSTR name, LPTSTR value)
 {
-	int location;
+	int location = 0;
+	bool findResult = false;
 	CStdioFile myFile;
 	CFileException fileException;
 	if(!myFile.Open(pszFileName, CFile::typeText|CFile::modeRead, &fileException))
 	{
-		printf("Read file error!");
 		return -1;
 	}
 
@@ -18,14 +18,14 @@ static int GetConfigValue(char *name, char *value)
 	CString str, str1;
 	while(myFile.ReadString(str))
 	{
-        printf("Get string = %s\n", str);
-		if((location = str.Find(_T(32))) != -1)  //find the space
+		if((location = str.Find(SPACE_ASCII_CODE)) != -1)  //find the space
 		{
 			str1 = str.Left(location);
 			if (0 == str1.CompareNoCase(name))  //The name is ok
 			{
 				str.Delete(0, location + 1);
-				str.TrimLeft();   //Move the all left space
+				str.TrimLeft();   //Move all the left space
+				findResult = true;
 				break;
 			}
 			else
@@ -35,41 +35,51 @@ static int GetConfigValue(char *name, char *value)
 		}
 		else
 		{
-			printf("The string is not confirm the rule\n");
 			continue;
 		}
 	}
-	memcpy(value, (LPSTR)(LPCTSTR)str, 20);
-	//value = (LPSTR)(LPCTSTR)str;
 	myFile.Close();
-	return 0;
+	if(findResult)
+	{
+		_tcscpy(value, str);
+		return 0;
+	}
+	else
+	{	
+		return -1;
+	}
 }
 
-static int SetConfigValue(char *name, char *value)
+static int SetConfigValue(LPCTSTR name, LPCTSTR value)
 {
-	int location, totalLength = 0;
+	int i;
+	bool findResult = false;
+	int location;
 	CStdioFile myFile;
 	CFileException fileException;
-	if(!myFile.Open(pszFileName, CFile::typeText|CFile::modeReadWrite, &fileException))
+	if(!myFile.Open(pszFileName, CFile::typeText |CFile::modeReadWrite, &fileException))
 	{
 		return -1;
 	}
 
 	myFile.SeekToBegin();
 	CString str, str1, str2;
+	CStringArray strArray;
 	while(myFile.ReadString(str))
 	{
-		totalLength += str.GetLength();
-		if((location = str.Find(_T(32))) != -1)  //find the space
+		strArray.Add(str);
+		if((location = str.Find(SPACE_ASCII_CODE)) != -1)  //find the space
 		{
 			str1 = str.Left(location);
 			if (0 == str1.CompareNoCase(name))  //The name is ok
 			{
-				str2.Format(_T("%s %s"), str1, value);  
-				myFile.Seek(totalLength - str.GetLength(), CFile::begin);
-				myFile.WriteString(_T("\n"));
-				myFile.WriteString(str2);
-				break;
+				str2 = str;
+				str2.Delete(0, location + 1);
+				str2.TrimLeft();                //Get the value
+				str.Replace(str2, value);       //Replace old value use new
+				strArray.RemoveAt(strArray.GetSize() - 1);
+				strArray.Add(str);
+				findResult = true;
 			}
 			else
 			{
@@ -78,34 +88,356 @@ static int SetConfigValue(char *name, char *value)
 		}
 		else
 		{
+			strArray.RemoveAt(strArray.GetSize() - 1);   //Remove the line which don't conform to the format
 			continue;
 		}
-
 	}
+	myFile.Close();
+
+	/* if not find the item, add new one */
+	if(!findResult)
+	{
+		str.Format(_T("%s%s%s"), name, _T(" "), value);
+		strArray.Add(str);
+	}
+
+	/* Write back to the file */
+	if(!myFile.Open(pszFileName, CFile::typeText | CFile::modeReadWrite, &fileException))
+	{
+		return -1;
+	}
+	for(i = 0; i < strArray.GetSize() - 1; i++)
+	{
+		str = strArray[i] + _T("\n");
+		myFile.WriteString(str);
+	}
+	myFile.WriteString(strArray[i]);  //The last line don't have "\n"
+
 	myFile.Close();
 	return 0;
 }
 
-int MPReadSTBProvider(char *value)
+int MPReadSTBProvider(LPTSTR value)
 {
 	int ret = 0;
 
-	ret = GetConfigValue("stb_provider", value);
+	ret = GetConfigValue(_T("stb_provider"), value);
 	if(ret)
 	{
-		printf("Get value error\n");
 		return -1;
 	}
 	
 	return 0;
 }
 
-int  MPWriteSTBProvider(char *stbProvider)
+int  MPWriteSTBProvider(LPCTSTR stbProvider)
 {
 	int ret = 0;
 
-	ret = SetConfigValue("stb_provider", stbProvider);
+	ret = SetConfigValue(_T("stb_provider"), stbProvider);
+	if(ret)
+	{
+		return -1;
+	}
 
 	return 0;
+}
 
+int MPReadOperatorId(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("operator_id"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int MPWriteOperatorId(LPCTSTR operatorId)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("operator_id"), operatorId);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadHWId(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("hw_id"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteHWId(LPCTSTR hwId)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("hw_id"), hwId);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadProductId(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("product_id"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteProductId(LPCTSTR productId)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("product_id"), productId);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadSWId(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("sw_id"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteSWId(LPCTSTR swId)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("sw_id"), swId);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadHWModel(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("hw_model"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int MPWriteHWModel(LPCTSTR hwModel)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("hw_model"), hwModel);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadSWModel(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("sw_model"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteSWModel(LPCTSTR swModel)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("sw_model"), swModel);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadHWConfig(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("hw_config"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteHWConfig(LPCTSTR hwConfig)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("hw_config"), hwConfig);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadYearWeek(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("year_week"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteYearWeek(LPCTSTR yearWeek)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("year_week"), yearWeek);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadManufacturerId(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("manufacturer_id"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteManufacturerId(LPCTSTR manufacturerId)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("manufacturer_id"), manufacturerId);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadHWVersion(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("hw_version"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteHWVersion(LPCTSTR hwVersion)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("hw_version"), hwVersion);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadSTBSN(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("stb_sn"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
+}
+
+int  MPWriteSTBSN(LPCTSTR stbSN)
+{
+	int ret = 0;
+
+	ret = SetConfigValue(_T("stb_sn"), stbSN);
+	if(ret)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int MPReadCommond(LPTSTR value)
+{
+	int ret = 0;
+
+	ret = GetConfigValue(_T("commond"), value);
+	if(ret)
+	{
+		return -1;
+	}
+	
+	return 0;
 }

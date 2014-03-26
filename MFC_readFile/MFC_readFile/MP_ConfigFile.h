@@ -1,46 +1,48 @@
 #ifndef _MP_CONFIGFILE_H_
 #define _MP_CONFIGFILE_H_
 
+#define VALUE_LENGTH        50
+#define SPACE_ASCII_CODE    32
 
-int MPReadSTBProvider(char *value);
-int MPWriteSTBProvider(char *stbProvider);
+int MPReadSTBProvider(LPTSTR value);
+int MPWriteSTBProvider(LPCTSTR stbProvider);
 
-char *MPReadOperatorId(void);
-void  MPWriteOperatorId(char *operatorId);
+int MPReadOperatorId(LPTSTR value);
+int MPWriteOperatorId(LPCTSTR operatorId);
 
-char *MPReadHWId(void);
-void  MPWriteHWId(char *hwId);
+int MPReadHWId(LPTSTR value);
+int MPWriteHWId(LPCTSTR hwId);
 
-char *MPReadProductId(void);
-void  MPWriteProductId(char *productId);
+int MPReadProductId(LPTSTR value);
+int MPWriteProductId(LPCTSTR productId);
 
-char *MPReadSWId(void);
-void  MPWriteSWId(char *swId);
+int MPReadSWId(LPTSTR value);
+int MPWriteSWId(LPCTSTR swId);
 
-char *MPReadHWModel(void);
-void  MPWriteHWModel(char *hwModel);
+int MPReadHWModel(LPTSTR value);
+int MPWriteHWModel(LPCTSTR hwModel);
 
-char *MPReadSWModel(void);
-void  MPWriteSWModel(char *swModel);
+int MPReadSWModel(LPTSTR value);
+int MPWriteSWModel(LPCTSTR swModel);
 
-char *MPReadHWConfig(void);
-void  MPWriteHWConfig(char *hwConfig);
+int MPReadHWConfig(LPTSTR value);
+int MPWriteHWConfig(LPCTSTR hwConfig);
 
-char *MPReadYearWeek(void);
-void  MPWriteYearWeek(char *yearWeek);
+int MPReadYearWeek(LPTSTR value);
+int MPWriteYearWeek(LPCTSTR yearWeek);
 
-char *MPReadManufacturerId(void);
-void  MPWriteManufacturerId(char *manufacturerId);
+int MPReadManufacturerId(LPTSTR value);
+int MPWriteManufacturerId(LPCTSTR manufacturerId);
 
-char *MPReadHWVersion(void);
-void  MPWriteHWVersion(char *hwVersion);
+int MPReadHWVersion(LPTSTR value);
+int MPWriteHWVersion(LPCTSTR hwVersion);
 
-char *MPReadSTBSN(void);
-void  MPWriteSTBSN(char *stbSN);
+int MPReadSTBSN(LPTSTR value);
+int MPWriteSTBSN(LPCTSTR stbSN);
 
 
 /* commond for operator the config file */
-char *MPReadCommond(void);
+int MPReadCommond(LPTSTR value);
 
 
 
