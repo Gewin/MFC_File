@@ -3,19 +3,43 @@
 
 LPCTSTR pszFileName= _T("MP_Config_File.ini");
 
+CString strDefault[] = {_T("stb_provider      0x1008"),
+						_T("operator_id       0x22"),
+						_T("hw_id             0x8888"),
+						_T("product_id        0x12345678"),
+						_T("sw_id             0x010203"),
+						_T("hw_model          0x12345678"),
+						_T("sw_model          0x12345678"),
+						_T("hw_config         0x123"),
+						_T("year_week         0x1234"),
+						_T("manufacturer_id   0x00000A"),
+						_T("hw_version        QS05-701-00419_2.0"),
+						_T("stb_sn            AVL41914120001"),
+						_T("commond           1111")};
+
 static int GetConfigValue(LPCTSTR name, LPTSTR value)
 {
+	int i;
+	CString str, str1;
 	int location = 0;
 	bool findResult = false;
 	CStdioFile myFile;
 	CFileException fileException;
 	if(!myFile.Open(pszFileName, CFile::typeText|CFile::modeRead, &fileException))
 	{
-		return -1;
+		if(!myFile.Open(pszFileName, CFile::modeCreate|CFile::modeReadWrite, &fileException))   //Create new one and set default value
+		{
+			return -1;
+		}
+		for(i = 0; i < sizeof(strDefault) / sizeof(strDefault[0]) - 1; i++)
+		{
+			str = strDefault[i] + _T("\n");
+			myFile.WriteString(str);
+		}
+		myFile.WriteString(strDefault[i]);  //The last line don't have "\n"
 	}
 
 	myFile.SeekToBegin();
-	CString str, str1;
 	while(myFile.ReadString(str))
 	{
 		if((location = str.Find(SPACE_ASCII_CODE)) != -1)  //find the space
@@ -53,18 +77,27 @@ static int GetConfigValue(LPCTSTR name, LPTSTR value)
 static int SetConfigValue(LPCTSTR name, LPCTSTR value)
 {
 	int i;
-	bool findResult = false;
 	int location;
+	CStringArray strArray;
+	CString str, str1, str2;
+	bool findResult = false;
 	CStdioFile myFile;
 	CFileException fileException;
-	if(!myFile.Open(pszFileName, CFile::typeText |CFile::modeReadWrite, &fileException))
+	if(!myFile.Open(pszFileName, CFile::typeText | CFile::modeReadWrite, &fileException))
 	{
-		return -1;
+		if(!myFile.Open(pszFileName, CFile::modeCreate | CFile::modeReadWrite, &fileException))   //Create new one and set default value
+		{
+			return -1;
+		}
+		for(i = 0; i < sizeof(strDefault) / sizeof(strDefault[0]) - 1; i++)
+		{
+			str = strDefault[i] + _T("\n");
+			myFile.WriteString(str);
+		}
+		myFile.WriteString(strDefault[i]);  //The last line don't have "\n"
 	}
 
 	myFile.SeekToBegin();
-	CString str, str1, str2;
-	CStringArray strArray;
 	while(myFile.ReadString(str))
 	{
 		strArray.Add(str);
@@ -102,7 +135,7 @@ static int SetConfigValue(LPCTSTR name, LPCTSTR value)
 	}
 
 	/* Write back to the file */
-	if(!myFile.Open(pszFileName, CFile::typeText | CFile::modeReadWrite, &fileException))
+	if(!myFile.Open(pszFileName, CFile::modeCreate | CFile::modeReadWrite, &fileException))
 	{
 		return -1;
 	}
